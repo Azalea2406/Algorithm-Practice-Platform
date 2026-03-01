@@ -80,32 +80,36 @@ public static String runSolution(String className, String input) {
 }
 
     // run test cases
-    public static void runTestCases(String className, String testCases) {
-        String[] testCasesArray = testCases.split(";");
-        boolean allTestsPassed = true;
+public static void runTestCases(String className, String testCases) {
+    String[] testCasesArray = testCases.split(";");
+    boolean allTestsPassed = true;
 
-        for (String testCase : testCasesArray) {
-            String[] testCaseParts = testCase.split("->");
-            String input = testCaseParts.length == 2 ? testCaseParts[0].trim() : null;
-            String expectedOutput = testCaseParts.length == 2 ? testCaseParts[1].trim() : testCaseParts[0].trim();
+    for (String testCase : testCasesArray) {
+        String[] testCaseParts = testCase.split("->");
+        String input = testCaseParts.length == 2 ? testCaseParts[0].trim() : null;
+        String expectedOutput = testCaseParts.length == 2 ? testCaseParts[1].trim() : testCaseParts[0].trim();
 
-            // Run the user solution 
-            String userOutput = runSolution(className, input);
+        // Run the user solution
+        String userOutput = runSolution(className, input);
 
-            // Check if the output matches the expected output
-            if (userOutput.equals(expectedOutput)) {
-                System.out.println("Test passed for the given input " + (input == null ? "No Input" : input));
-            } else {
-                System.out.println("Test failed for the given input " + (input == null ? "No Input" : input));
-                System.out.println("Expected: " + expectedOutput + " | Got: " + userOutput);
-                allTestsPassed = false;
-            }
+        if (userOutput.equals("TLE")) {
+            System.out.println("[TLE] Time Limit Exceeded for input: " + (input == null ? "No Input" : input));
+            allTestsPassed = false;
         }
-
-        if (allTestsPassed) {
-            System.out.println("All test cases passed!");
+        // Check correctness
+        else if (userOutput.equals(expectedOutput)) {
+            System.out.println("[AC] Test passed for input: " + (input == null ? "No Input" : input));
         } else {
-            System.out.println("Some test cases failed.");
+            System.out.println("[WA] Test failed for input: " + (input == null ? "No Input" : input));
+            System.out.println("Expected: " + expectedOutput + " | Got: " + userOutput);
+            allTestsPassed = false;
         }
     }
+
+    if (allTestsPassed) {
+        System.out.println("\nAll test cases passed successfully!");
+    } else {
+        System.out.println("\nSome test cases failed.");
+    }
+}
 }
