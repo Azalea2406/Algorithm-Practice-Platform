@@ -32,37 +32,52 @@ public class TestCaseEvaluator {
     }
 
     // Run the user's solution
-    public static String runSolution(String className, String input) {
-        String output = "";
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("java", className);
-            processBuilder.directory(new File(".")); 
+public static String runSolution(String className, String input) {
+    String output = "";
+    try {
+        ProcessBuilder processBuilder = new ProcessBuilder("java", className);
+        processBuilder.directory(new File(".")); 
 
-            // Start the process
-            Process process = processBuilder.start();
-            
-            if (input != null && !input.isEmpty()) {
-                OutputStream os = process.getOutputStream();
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
-                writer.write(input);
-                writer.flush();
-                writer.close();
-            }
+        long startTime = System.nanoTime();
+        Process process = processBuilder.start();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder outputBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                outputBuilder.append(line).append("\n");
-            }
-            output = outputBuilder.toString().trim();
-
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        // Send input to the program
+        if (input != null && !input.isEmpty()) {
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(process.getOutputStream()));
+            writer.write(input);
+            writer.newLine();
+            writer.flush();
+            writer.close();
         }
-        return output;
+
+        // Time limit: 2 seconds
+        boolean finished = process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroy();
+            return "TLE";
+        }
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(process.getInputStream()));
+        StringBuilder outputBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            outputBuilder.append(line).append("\n");
+        }
+
+        long endTime = System.nanoTime();
+        long durationMs = (endTime - startTime) / 1_000_000;
+
+        output = outputBuilder.toString().trim();
+        System.out.println("Execution Time: " + durationMs + " ms");
+
+    } catch (IOException | InterruptedException e) {
+        e.printStackTrace();
     }
+
+    return output;
+}
 
     // run test cases
     public static void runTestCases(String className, String testCases) {
